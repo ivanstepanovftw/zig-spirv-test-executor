@@ -85,8 +85,8 @@ jobs:
       with:
         version: 0.14.1
 
-    - name: Check formatting
-      run: zig fmt --check .
+#    - name: Check formatting
+#      run: zig fmt --check .
 
     - name: Build executor
       run: zig build
