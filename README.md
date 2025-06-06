@@ -14,15 +14,14 @@ After obtaining these dependencies, simply run `zig build` to build the project.
 ## Running tests
 
 To actually run tests, use something like the following:
-```
-$ zig test src/test_kernel.zig \
+```shell
+export RUSTICL_ENABLE=radeonsi
+zig test src/test_kernel.zig \
     --test-runner src/test_runner.zig \
     -target spirv64-opencl-gnu \
-    -mcpu generic+Int64+Int16+Int8+Float64+Float16 \
+    -mcpu generic+int64+int16+int8+float64+float16+kernel+addresses \
     -fno-llvm \
     --test-cmd zig-out/bin/zig-spirv-test-executor \
-    --test-cmd --platform \
-    --test-cmd Intel \
     --test-cmd-bin
 ```
 
