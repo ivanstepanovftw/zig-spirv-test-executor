@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, ci ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 6 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Fetch dependencies
+      run: |
+        set -euxo pipefail
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt update
+        sudo apt install -y \
+          git cmake ninja-build \
+          clinfo ocl-icd-opencl-dev pocl-opencl-icd
+        
+        git clone --single-branch --depth 1 https://github.com/KhronosGroup/OpenCL-Headers.git
+        (
+          cd OpenCL-Headers
+          cmake -B build -G Ninja -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && sudo cmake --install build
+        )
+        git clone --single-branch --depth 1 https://github.com/KhronosGroup/OpenCL-ICD-Loader.git
+        (
+          cd OpenCL-ICD-Loader
+          cmake -B build -G Ninja -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && sudo cmake --install build
+        )
+        git clone --single-branch --depth 1 --recursive https://github.com/KhronosGroup/SPIRV-Tools.git
+        (
+          cd SPIRV-Tools
+          cmake -B build -G Ninja -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && sudo cmake --install build
+        )
+        sudo ldconfig
+        clinfo
+
+    - name: Setup Zig
+      uses: mlugg/setup-zig@v2
+      with:
+        version: 0.14.1
+
+    - name: Check formatting
+      run: zig fmt --check .
+
+    - name: Build executor
+      run: zig build
+
+    - name: Run tests
+      run: |
+        export RUSTICL_ENABLE=radeonsi
+        zig test src/test_kernel.zig \
+            --test-runner src/test_runner.zig \
+            -target spirv64-opencl-gnu \
+            -mcpu generic+int64+int16+int8+float64+float16+kernel+addresses \
+            -fno-llvm \
+            --test-cmd zig-out/bin/zig-spirv-test-executor \
+            --test-cmd-bin

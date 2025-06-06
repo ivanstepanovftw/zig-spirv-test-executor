@@ -1,6 +1,7 @@
 .{
-    .name = "zig-spirv-test-executor",
+    .name = .zig_spirv_test_executor,
     .version = "0.1.0",
+    .fingerprint = 0xb63e00837010d824,
     .dependencies = .{
         .opencl = .{
             .url = "https://github.com/Snektron/opencl-zig/archive/edde6cc92611ca526ce652d81b1688cb03c084bb.tar.gz",
