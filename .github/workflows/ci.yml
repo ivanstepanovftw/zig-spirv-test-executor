@@ -37,8 +37,8 @@ jobs:
     - name: Fetch apt packages
       run: |
         set -euxo pipefail
-        sudo apt update
-        sudo apt install -y git cmake ninja-build \
+        sudo apt-get update
+        sudo apt-get install -y git cmake ninja-build \
                             clinfo ocl-icd-opencl-dev pocl-opencl-icd mesa-opencl-icd
 
     - name: Build OpenCL deps
@@ -71,6 +71,7 @@ jobs:
 
     - name: Install OpenCL deps into /usr/local
       run: |
+        set -euxo pipefail
         sudo cmake --install OpenCL-Headers/build
         sudo cmake --install OpenCL-ICD-Loader/build
         sudo cmake --install SPIRV-Tools/build
@@ -91,12 +92,13 @@ jobs:
     - name: Run tests
       env:
         RUST_BACKTRACE: full
+#        RUSTICL_ENABLE: radeonsi
         RUSTICL_ENABLE: llvmpipe
       run: |
         zig test src/test_kernel.zig \
             --test-runner src/test_runner.zig \
             -target spirv64-opencl-none \
-            -mcpu generic+int64+int16+int8+float64+float16+kernel+addresses \
+            -mcpu generic+int64+int16+int8+float64+float16 \
             -fno-llvm \
             --test-cmd zig-out/bin/zig-spirv-test-executor \
             --test-cmd --platform \
