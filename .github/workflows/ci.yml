@@ -98,7 +98,7 @@ jobs:
         zig test src/test_kernel.zig \
             --test-runner src/test_runner.zig \
             -target spirv64-opencl-none \
-            -mcpu generic+int64+int16+int8+float64+float16 \
+            -mcpu generic+int64+int16+int8+float64+float16+kernel+addresses \
             -fno-llvm \
             --test-cmd zig-out/bin/zig-spirv-test-executor \
             --test-cmd --platform \
