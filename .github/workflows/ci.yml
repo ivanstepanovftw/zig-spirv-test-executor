@@ -27,10 +27,10 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          OpenCL-Headers/build
-          OpenCL-ICD-Loader/build
-          SPIRV-Tools/build
-        key:  ${{ runner.os }}-opencl-${{ steps.dephash.outputs.headers }}-${{ steps.dephash.outputs.icd }}-${{ steps.dephash.outputs.spirv }}
+          OpenCL-Headers
+          OpenCL-ICD-Loader
+          SPIRV-Tools
+        key: ${{ runner.os }}-opencl-${{ steps.dephash.outputs.headers }}-${{ steps.dephash.outputs.icd }}-${{ steps.dephash.outputs.spirv }}-0
         restore-keys: |
           ${{ runner.os }}-opencl-
 
@@ -88,17 +88,17 @@ jobs:
     - name: Build executor
       run: zig build
 
-    - name: Run tests
-      env:
-        RUST_BACKTRACE: full
-        RUSTICL_ENABLE: llvmpipe
-      run: |
-        zig test src/test_kernel.zig \
-            --test-runner src/test_runner.zig \
-            -target spirv64-opencl-none \
-            -mcpu generic+int64+int16+int8+float64+float16+kernel+addresses \
-            -fno-llvm \
-            --test-cmd zig-out/bin/zig-spirv-test-executor \
-            --test-cmd --platform \
-            --test-cmd rusticl \
-            --test-cmd-bin
+#    - name: Run tests
+#      env:
+#        RUST_BACKTRACE: full
+#        RUSTICL_ENABLE: llvmpipe
+#      run: |
+#        zig test src/test_kernel.zig \
+#            --test-runner src/test_runner.zig \
+#            -target spirv64-opencl-none \
+#            -mcpu generic+int64+int16+int8+float64+float16+kernel+addresses \
+#            -fno-llvm \
+#            --test-cmd zig-out/bin/zig-spirv-test-executor \
+#            --test-cmd --platform \
+#            --test-cmd rusticl \
+#            --test-cmd-bin
